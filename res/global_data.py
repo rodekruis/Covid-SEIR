@@ -1,7 +1,6 @@
 from datetime import datetime
 import os.path
 import time
-from res import fetch_data
 import numpy as np
 import pandas as pd
 import urllib.request as urllib
