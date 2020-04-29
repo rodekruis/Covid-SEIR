@@ -128,9 +128,9 @@ def rerun_model_with_alpha_uncertainty(model_conf, p, config,fwd_args):
 
 
 
-def plot_results(results, time, configpath, config, data, integrated_result=None, cal_mode=None, prior=True, plot_plume= True):
+def plot_results(results, time, configpath, outpath, config, data, integrated_result=None, cal_mode=None, prior=True, plot_plume= True):
     base = (os.path.split(configpath)[-1]).split('.')[0]
-    outpath = os.path.join(os.path.split(os.getcwd())[0], 'output', base)
+    outputpath = os.path.join(outpath, base)
 
     date_1 = datetime.datetime.strptime(config['startdate'], "%m/%d/%y")
     t = [date_1 + datetime.timedelta(days=a - 1) for a in time]
@@ -178,7 +178,7 @@ def plot_results(results, time, configpath, config, data, integrated_result=None
 
     plt.grid(True)
     ax.legend(loc=config['plot']['legendloc'], fontsize=config['plot']['legendfont'])
-    plt.savefig('{}_priors_MC_{}.png'.format(outpath, cal_mode), dpi=300)
+    plt.savefig('{}_priors_MC_{}.png'.format(outputpath, cal_mode), dpi=300)
 
     if not config['worldfile']:
         plt.plot(t_obs, data[:, I_HOSCUM], "go", markersize=2, markeredgecolor='k', alpha=1, label='hospitalized cum (data)')
@@ -215,7 +215,7 @@ def plot_results(results, time, configpath, config, data, integrated_result=None
     plottype = '{}_forecast_MC_{}'
     if prior:
         plottype = '{}_hindcast_MC_{}.png'
-    plt.savefig(plottype.format(outpath, cal_mode), dpi=300)
+    plt.savefig(plottype.format(outputpath, cal_mode), dpi=300)
     plt.close()
 
 
@@ -228,9 +228,8 @@ def sample_from_prior(prior,p,config):
 def main(configpath):
     # Load the model configuration file and the data (observed cases)
     config = load_config(configpath)
-    data= load_data(config)
-
-
+    data = load_data(config)
+    outpath = config['outpath']
 
     useworldfile = config['worldfile']
     if (not useworldfile):
@@ -238,7 +237,7 @@ def main(configpath):
     else:
         data = generate_zero_columns(data, config)
     # Run the forward model to obtain a prior ensemble of models
-    save_input_data (configpath, data)
+    save_input_data(configpath, outpath, data)
     prior, time, prior_param, fwd_args = run_prior(config)
 
     # Calibrate the model (as calibration data, we either use 'hospitalized' or 'dead')
@@ -264,18 +263,17 @@ def main(configpath):
     integrated_results = integrate_calibration(prior, p)  # Mean posterior model
 
     # Create output of the calibration phase
-    plot_results(prior, time, configpath, config, data, integrated_results, calibration_mode, prior=True, plot_plume= plotplume )
+    plot_results(prior, time, configpath, outpath, config, data, integrated_results, calibration_mode, prior=True,
+                 plot_plume=plotplume )
 
     # Based on the model performance in the past, run models again, forecasting the future 
 
     forecast = rerun_model_with_alpha_uncertainty(prior_param, p, config, fwd_args)
-    base = (os.path.split(configpath)[-1]).split('.')[0]
-    outbase = os.path.join(os.path.split(os.getcwd())[0], 'output', base)
 
-    plot_results(forecast, time, configpath, config, data, cal_mode= config['calibration_mode'], prior=False,
-                     plot_plume=True)
+    plot_results(forecast, time, configpath, outpath, config, data, cal_mode=config['calibration_mode'], prior=False,
+                 plot_plume=True)
 
-    plot_posterior(forecast, config,outbase,data,['time'])
+    plot_posterior(forecast, config, configpath, outpath, data, ['time'])
 
     try:
         hospital_forecast_to_txt(forecast, time, configpath, config, data)

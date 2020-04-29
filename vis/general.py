@@ -1,6 +1,7 @@
 from src.tools import generate_hos_actual
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 I_TIME = 0
 I_INF = 1
@@ -28,7 +29,9 @@ S_HOSCUM = 'hospitalizedcum'
 S_DEAD = 'dead'
 
 
-def plot_posterior(results, config, outbase, data, data_labels):
+def plot_posterior(results, config, configpath, outpath, data, data_labels):
+    base = (os.path.split(configpath)[-1]).split('.')[0]
+    outputpath = os.path.join(outpath, base)
     calmodes = [S_HOS, S_ICU, S_HOSCUM, S_DEAD]
     o_indices = [O_HOS, O_ICU, O_HOSCUM, O_DEAD]
 
@@ -97,12 +100,12 @@ def plot_posterior(results, config, outbase, data, data_labels):
         plt.ylabel('Number of cases')
         plt.legend(loc='upper left')
         plt.title(title + ' posterior ensemble')
-        plt.savefig('{}posterior_ensemble_{}.png'.format(outbase, calmode), dpi=300)
+        plt.savefig('{}posterior_ensemble_{}.png'.format(outputpath, calmode), dpi=300)
 
         plt.xlim(0, time.max())
-        plt.savefig('{}posterior_ensemble_{}_longterm.png'.format(outbase, calmode), dpi=300)
+        plt.savefig('{}posterior_ensemble_{}_longterm.png'.format(outputpath, calmode), dpi=300)
         plt.ylim(0, posterior_curves.max())
-        plt.savefig('{}posterior_ensemble_{}_longterm_alt.png'.format(outbase, calmode), dpi=300)
+        plt.savefig('{}posterior_ensemble_{}_longterm_alt.png'.format(outputpath, calmode), dpi=300)
         plt.close()
 
         p_values = config['p_values']
@@ -119,5 +122,5 @@ def plot_posterior(results, config, outbase, data, data_labels):
         p_array = np.asarray(p_array)
         observed = np.pad(y_obs, (0, len(steps) - len(y_obs)), mode='constant', constant_values=np.nan)[:, None]
         table = np.concatenate((steps[:, None], post_mean[t_ind, None], p_array, observed), axis=1)
-        np.savetxt('{}_posterior_prob_{}_calibrated_on_{}.csv'.format(outbase, calmode, config['calibration_mode']),
+        np.savetxt('{}_posterior_prob_{}_calibrated_on_{}.csv'.format(outputpath, calmode, config['calibration_mode']),
                    table, header=header, delimiter=',', comments='', fmt='%.2f')

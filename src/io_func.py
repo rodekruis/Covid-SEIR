@@ -22,14 +22,14 @@ def load_config(configpath):
         pass
     return config
 
-def save_input_data(configpath,  datanew):
+
+def save_input_data(configpath, outpath, datanew):
     base = (os.path.split(configpath)[-1]).split('.')[0]
-    outpath = os.path.join(os.path.split(os.getcwd())[0], 'output', base)
+    outputpath = os.path.join(outpath, base)
     header = 'day,test,dead,rec,hoscum,icu,hosact'
     table =  datanew[:,0:7] #np.concatenate((datanew[:, 0:6]), axis=-1)
-    np.savetxt('{}_inputdata{}.txt'.format(outpath, '', ''),
+    np.savetxt('{}_inputdata{}.txt'.format(outputpath, '', ''),
                table, header=header, delimiter=',',comments='',fmt='%8d')
-
 
 
 def load_data(config):

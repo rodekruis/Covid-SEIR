@@ -2,6 +2,7 @@
   "worldfile": false,
   "country": "../res/corona_dataNL26.txt",
   "startdate": "3/1/20",
+  "outpath": "output",
   "maxrecords":21,
   "t_max" : 120,
   "dt" : 0.01,
