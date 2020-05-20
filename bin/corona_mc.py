@@ -86,15 +86,20 @@ def calibrate_with_data(prior, t, data,data_index, output_index):
     llmax = ll.max()
 
     p = np.exp(ll - llmax) / np.sum(np.exp(ll - llmax))
-
     return p
 
 
 def integrate_calibration(results, p):
     # Multiply each prior member with its probability. Sum to obtain mean posterior
+	# tmp
     integrated_result = np.einsum('ijk,i', results, p)
     return integrated_result
 
+def integrate_parameters(m_prior, p):
+    # Multiply each prior member with its probability. Sum to obtain mean posterior
+	# tmp
+    integrated_result = np.einsum('ij,i', np.array(m_prior), p)
+    return integrated_result
 
 def rerun_model_with_alpha_uncertainty(model_conf, p, config,fwd_args):
     """
@@ -260,6 +265,9 @@ def main(configpath):
     plotplume = config['plot']['hindcast_plume']
 
     p = calibrate_with_data(prior, time, data, data_index, output_index)  # Posterior probability for each ensemble member
+    integrated_parameter_values = integrate_parameters(prior_param,p)
+    np.savetxt(outpath+"/integrated_parameter_values.csv", integrated_parameter_values, delimiter=";")
+
     integrated_results = integrate_calibration(prior, p)  # Mean posterior model
 
     # Create output of the calibration phase
