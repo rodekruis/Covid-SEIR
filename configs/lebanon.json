@@ -1,0 +1,56 @@
+{
+  "worldfile": true,
+  "country": "Lebanon",
+  "province": "",
+  "startdate": "3/1/20",
+  "outpath": "output\\lebanon",
+  "maxrecords": 180,
+  "t_max" : 210,
+  "dt" : 0.1,
+  "time_delay": 30,
+  "population": 6.89e6,
+  "nr_prior_samples": 1000,
+  "nr_forecast_samples": 400,
+  "esmda_iterations": 16,
+  "N" : {
+    "type": "uniform",
+    "min":  5880000,
+    "max":  58800000
+  },
+  "sigma" : 0.2,
+  "gamma" : 0.5,
+  "R0" : {
+    "type": "uniform",
+    "min": 2.0,
+    "max": 2.5
+  },
+  "m": 0.9,
+  "alpha" : [[0.35,0.55], [0.6,0.7], [0.7,0.8], [0.5,0.6], [0.45,0.55], [0.4,0.5]],
+  "dayalpha" : [0, 10, 18, 55, 90, 125],
+  "hosfrac" : 0.17,
+  "delayHOS" : 5,
+  "delayHOSREC" : 14,
+  "delayHOSD" : 3,
+  "delayREC" : 12,
+  "delayICUCAND": 0,
+  "delayICUD": 3,
+  "delayICUREC": 14,
+  "dfrac" : 0.22,
+  "icudfrac" : 0.5,
+  "calibration_mode": "dead",
+  "observation_error": 50,
+  "YMAX": 5e4,
+  "XMAX": 210,
+  "ICufrac": 0.0,
+  "p_values": [0.05, 0.3, 0.5, 0.7, 0.95],
+  "plot" : {
+    "legendloc" : "best",
+    "legendfont" : "x-small",
+    "y_axis_log": true,
+    "hindcast_plume": false,
+    "xmaxalpha": 31,
+    "casename": "Lebanon"
+  },
+  "hist_time_steps": [30,35,40,50,60]
+
+}

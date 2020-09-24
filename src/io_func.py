@@ -180,25 +180,30 @@ def dict_from_h5(hf):
     return ret_dict
 
 
-def hospital_forecast_to_txt(results, t, configpath, config, data):
-    hospitalized = results[:, 6, :].T
-    steps = np.arange(1., 83.)
-    t_ind = [np.where(t == a)[0][0] for a in steps]
-    hospitalized = hospitalized[t_ind]
-    p_values = config['p_values']
-    p_array = []
-    posterior_length = hospitalized.shape[1]
-    for hosp_day in hospitalized:
-        array_sorted = np.sort(hosp_day)
-        p_array.append([array_sorted[int(posterior_length * p)] for p in p_values])
-    mean = np.mean(hospitalized, axis=1)
-    h_pvalues = ['P' + str(int(100 * a)) for a in p_values]
-    header = 'time,mean,' + ','.join(h_pvalues) + ',observed'
-    p_array = np.asarray(p_array)
-    observed = np.pad(data[:, 4], (0, len(steps) - data.shape[0]), mode='constant', constant_values=np.nan)[:, None]
-    table = np.concatenate((steps[:, None], mean[:, None], p_array, observed), axis=1)
-    np.savetxt('output/' + configpath.split('.')[0] + '_hospitalized_prob.csv', table, header=header, delimiter=',',
-               comments='', fmt='%.2f')
+def hospital_forecast_to_txt(results, t, configpath, outpath, config):
+    base = (os.path.split(configpath)[-1]).split('.')[0]
+    outputpath = os.path.join(outpath, base)
+    # Time, Suscep, Expos, Infec, Removed, Hospitalized, Hos (cummulative), ICU, ICU (cummulative), Recovered, Dead
+    labels = ['T', 'S', 'E', 'I', 'REM', 'HOS', 'HOSCUM', 'ICU', 'ICUCUM', 'REC', 'D']
+    for i in range(len(labels)):
+        hospitalized = results[:, i, :].T
+        steps = np.arange(1., config['t_max']-config['time_delay'])
+        t_ind = [np.where(t == a)[0][0] for a in steps]
+        hospitalized = hospitalized[t_ind]
+        p_values = config['p_values']
+        p_array = []
+        posterior_length = hospitalized.shape[1]
+        for hosp_day in hospitalized:
+            array_sorted = np.sort(hosp_day)
+            p_array.append([array_sorted[int(posterior_length * p)] for p in p_values])
+        mean = np.median(hospitalized, axis=1)
+        h_pvalues = ['P' + str(int(100 * a)) for a in p_values]
+        header = 'time,mean,' + ','.join(h_pvalues) + ',max_t'
+        p_array = np.asarray(p_array)
+        table = np.concatenate((steps[:, None], mean[:, None], p_array), axis=1)
+        np.savetxt(outputpath + '_'+labels[i]+'_prob.csv', table, header=header, delimiter=',', comments='',fmt='%.2f')
+        t_max_array = np.argmax(hospitalized, axis=0)
+        np.savetxt(outputpath + '_' + labels[i] + '_tmax.csv', t_max_array, delimiter=',', comments='', fmt='%.2f')
 
 
 def labelled_array_to_h5(base, name, data, labels, scales):
